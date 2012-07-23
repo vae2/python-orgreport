@@ -1,16 +1,21 @@
 
-
+import sys
+import getopt
 import datetime
 
-def get_tasks(file=None, tStart=datetime.datetime.min, tStop=datetime.datetime.max):   
+def get_tasks(filename=None, tStart=datetime.datetime.min, tStop=datetime.datetime.max):   
     """Returns list of Task objects containing clock time in range specified.
     
     Takes filename as string and datetime objects as inputs."""
     import re
 
-    f = open(file, 'r')
-    lines = f.readlines()
-    f.close()
+    try:
+        f = open(filename, 'r')
+    except IOError as e:
+        print 'I/O error({0}): {1}'.format(e.errno, e.strerror)
+    else:
+        lines = f.readlines()
+        f.close()
     taskCount = 0
     nonTaskCount = 0
     clockTimeCount = 0
@@ -53,16 +58,20 @@ def get_tasks(file=None, tStart=datetime.datetime.min, tStop=datetime.datetime.m
                 stop = taskStop <= tStop
                 if start and stop:
                     td = taskStop - taskStart
+                    print '1'
+                    print td
                     tTemp.append([taskStart, taskStop])
                     dTemp.append(td)
                 elif (not start) and stop:
-                    td = taskStop - tStart
-                    tTemp.append([tStart, taskStop])
-                    dTemp.append(td)
+                    if taskStop > tStart:
+                        td = taskStop - tStart
+                        tTemp.append([tStart, taskStop])
+                        dTemp.append(td)
                 elif start and (not stop):
-                    td = tStop - taskStart
-                    tTemp.append([taskStart, tStop])
-                    dTemp.append(td)
+                    if tStop > taskStart:
+                        td = tStop - taskStart
+                        tTemp.append([taskStart, tStop])
+                        dTemp.append(td)
                 else:
                     pass
         taskTimeList.append(tTemp)
@@ -73,18 +82,50 @@ def get_tasks(file=None, tStart=datetime.datetime.min, tStop=datetime.datetime.m
     # print 'Found %d clock-time headers\n' % clockTimeCount
     return(taskHeaderList, taskTimeList, taskTimeDeltaList)
 
-if __name__ == "__main__":                 
-    tBeg = datetime.datetime(2012, 7, 22, 0, 0)
-    tEnd = datetime.datetime(2012, 7, 22, 23, 59)
-    (taskHeaders, taskTimes, taskTimeDeltas) = get_tasks('example.org', tBeg, tEnd)
-    nt = len(taskHeaders)
-    print 'get_tasks returned %d tasks' % nt
-    ntt = len(taskTimes)
-    print 'get_tasks returned %d time pairs' %ntt
-    nd = len(taskTimeDeltas)
-    print 'get_tasks returned %d deltas' % nd
+def usage():
+    print 'Usage: pyreport [OPTION] files ...\nTry \'pyreport --help\' for more infomration'
 
-    for td in taskTimeDeltas:
-        print 'Num of clock ins: %d\n' % (len(td))
-        for tdelta in td:
-            print '%d minutes' % (tdelta.seconds/60)
+def main(argv):
+    try:
+        opts, fileList = getopt.getopt(argv, 'b:e:t:h:', ['begin-date', 'end-date', 'tags', 'help'])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+
+    tBeg = datetime.datetime.min # default is beginning of time (all records)
+    tEnd = datetime.datetime.max # default is end of time (all records)
+    dformat = '%Y-%m-%d'
+    for opt, arg in opts:
+        if opt in ('-h', '--help'):
+            usage()
+            sys.exit()
+        elif opt in ('-b', '--begin-date'):
+            dBeg = datetime.datetime.strptime(arg, dformat)
+            dtime = datetime.time(0, 0)
+            tBeg = datetime.datetime.combine(dBeg, dtime)
+        elif opt in ('-e', '--end-date'):
+            dEnd = datetime.datetime.strptime(arg, dformat)
+            dtime = datetime.time(23, 59)
+            tEnd = datetime.datetime.combine(dEnd, dtime)
+    
+    print 'Remaining arguments: %d' % (len(fileList))
+    if len(fileList) == 0:
+        print 'Missing filename parameters'
+        sys.exit(3)
+
+    for f in fileList:
+        (taskHeaders, taskTimes, taskTimeDeltas) = get_tasks(f, tBeg, tEnd)
+        nt = len(taskHeaders)
+        print 'get_tasks returned %d tasks' % nt
+        ntt = len(taskTimes)
+        print 'get_tasks returned %d time pairs' %ntt
+        nd = len(taskTimeDeltas)
+        print 'get_tasks returned %d deltas' % nd
+
+        for td in taskTimeDeltas:
+            print 'Num of clock ins: %d\n' % (len(td))
+            for tdelta in td:
+                print '%d minutes' % (tdelta.seconds/60)
+
+if __name__ == "__main__":                 
+    main(sys.argv[1:])
