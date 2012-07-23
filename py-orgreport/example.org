@@ -1,0 +1,29 @@
+#+STARTUP: overview
+
+* DONE Go to the grocery store
+  CLOSED: [2012-07-22 Sun 15:21]
+  :LOGBOOK:
+  CLOCK: [2012-07-22 Sun 09:20]--[2012-07-22 Sun 10:45] =>  1:25
+  :END:
+
+* Tasks
+** DONE Play board games
+   :LOGBOOK:
+   CLOCK: [2012-07-21 Sat 22:59]--[2012-07-22 Sun 02:45] =>  3:46
+   :END:
+** INPROGRESS Julython coding
+   :LOGBOOK:
+   CLOCK: [2012-07-22 Sun 19:53]--[2012-07-23 Mon 02:54] =>  7:01
+   CLOCK: [2012-07-22 Sun 16:45]--[2012-07-22 Sun 18:40] =>  1:55
+   :END:
+** WAITING Take a quick look at Python code
+   SCHEDULED: <2012-07-22 Sun>
+   :LOGBOOK:
+   CLOCK: [2012-07-22 Sun 13:00]--[2012-07-22 Sun 13:35] =>  0:35
+   :END:
+** DONE Make brunch 
+   CLOSED: [2012-07-22 Sun 15:23]
+   :LOGBOOK:
+   CLOCK: [2012-07-22 Sun 11:21]--[2012-07-22 Sun 12:23] =>  1:02
+   :END:
+
