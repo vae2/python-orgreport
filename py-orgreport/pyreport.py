@@ -2,6 +2,7 @@
 import sys
 import getopt
 import datetime
+import pylab
 
 def get_tasks(filename=None, tStart=datetime.datetime.min, tStop=datetime.datetime.max):   
     """Returns list of Task objects containing clock time in range specified.
@@ -58,8 +59,6 @@ def get_tasks(filename=None, tStart=datetime.datetime.min, tStop=datetime.dateti
                 stop = taskStop <= tStop
                 if start and stop:
                     td = taskStop - taskStart
-                    print '1'
-                    print td
                     tTemp.append([taskStart, taskStop])
                     dTemp.append(td)
                 elif (not start) and stop:
@@ -81,6 +80,14 @@ def get_tasks(filename=None, tStart=datetime.datetime.min, tStop=datetime.dateti
     # print 'Found %d non-task headers\n' % nonTaskCount
     # print 'Found %d clock-time headers\n' % clockTimeCount
     return(taskHeaderList, taskTimeList, taskTimeDeltaList)
+
+def sum_deltas(ltimes=None):
+    """Sum list of timedelta objects"""
+    import datetime
+    tsum = datetime.timedelta(0)
+    for td in ltimes:
+        tsum = tsum + td
+    return tsum
 
 def usage():
     print 'Usage: pyreport [OPTION] files ...\nTry \'pyreport --help\' for more infomration'
@@ -115,6 +122,11 @@ def main(argv):
 
     for f in fileList:
         (taskHeaders, taskTimes, taskTimeDeltas) = get_tasks(f, tBeg, tEnd)
+        clockTimeDeltaSum = [sum_deltas(tdlist) for tdlist in taskTimeDeltas]
+        clockMinutes = [ct.seconds/60 for ct in clockTimeDeltaSum]
+
+        pylab.pie(clockMinutes, labels=taskHeaders)
+
         nt = len(taskHeaders)
         print 'get_tasks returned %d tasks' % nt
         ntt = len(taskTimes)
